@@ -1,37 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from '../dashboard.module.css';
+import { getProjects } from "@/app/actions/projects";
 
 // ── mock data (replace with real API calls) ──────────────────────────────────
 const mockUser = { name: "Eric Daniel", email: "eric@example.com", role: "user" };
-
-const mockProjects = [
-    {
-        id: 1, name: "Final Year Thesis", sdlc: "Agile",
-        currentPhase: "Design", status: "active", progress: 35,
-        taskSummary: { total: 13, done: 4, inProgress: 3, blocked: 1, todo: 5 },
-        updatedAt: "2 hours ago",
-    },
-    {
-        id: 2, name: "E-Commerce API", sdlc: "Waterfall",
-        currentPhase: "Implementation", status: "active", progress: 62,
-        taskSummary: { total: 20, done: 12, inProgress: 4, blocked: 0, todo: 4 },
-        updatedAt: "1 day ago",
-    },
-    {
-        id: 3, name: "Portfolio Redesign", sdlc: "RAD",
-        currentPhase: "Testing", status: "active", progress: 80,
-        taskSummary: { total: 10, done: 8, inProgress: 1, blocked: 0, todo: 1 },
-        updatedAt: "3 days ago",
-    },
-    {
-        id: 4, name: "Mobile App MVP", sdlc: "Agile",
-        currentPhase: "Planning", status: "archived", progress: 15,
-        taskSummary: { total: 8, done: 1, inProgress: 0, blocked: 2, todo: 5 },
-        updatedAt: "2 weeks ago",
-    },
-];
 
 const mockActivity = [
     { id: 1, project: "Final Year Thesis", action: "Phase advanced to Design", time: "2h ago", type: "phase" },
@@ -44,9 +18,14 @@ const mockActivity = [
 
 function PhaseStatusBadge({ phase, status }: { phase: string; status: string }) {
     return (
-        <span className={`${styles.phaseBadge} ${status === "archived" ? styles.phaseBadgeArchived : ""}`}>
-            {phase}
-        </span>
+        <div className="flex flex-row p-3 text-lg">
+            <span className={`${styles.phaseBadge} ${status === "archived" ? styles.phaseBadgeArchived : ""}`}>
+                {status}
+            </span>
+            <span className={`${styles.phaseBadge} ${status === "archived" ? styles.phaseBadgeArchived : ""}`}>
+                Phase {phase}
+            </span>
+        </div>
     );
 }
 
@@ -69,16 +48,30 @@ function ActivityIcon({ type }: { type: string }) {
 }
 
 export default function DashboardPage() {
+    const [projects, setProjects] = useState<Project[]>([]);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [loadingProject, setLoadingProject] = useState(true);
+    const [error, setError] = useState("");
     const [filter, setFilter] = useState<"all" | "active" | "archived">("all");
 
-    const filtered = mockProjects.filter(p => filter === "all" ? true : p.status === filter);
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const data = await getProjects();
+                setProjects(data);
+                console.log(data);
+            } catch (err) {
+                setError("Could not load projects.");
+            } finally {
+                setLoadingProject(false);
+            }
+        };
+        loadData();
+    }, []);
 
-    const totalProjects = mockProjects.length;
-    const activeProjects = mockProjects.filter(p => p.status === "active").length;
-    const totalTasks = mockProjects.reduce((s, p) => s + p.taskSummary.total, 0);
-    const doneTasks = mockProjects.reduce((s, p) => s + p.taskSummary.done, 0);
-    const blockedTasks = mockProjects.reduce((s, p) => s + p.taskSummary.blocked, 0);
+    const filtered = projects.filter(p => filter === "all" ? true : p.status === filter);
+    const totalProjects = projects.length;
+    const activeProjects = projects.filter(p => p.status === "active").length;
 
     return (
         <div className={styles.root}>
@@ -169,18 +162,18 @@ export default function DashboardPage() {
                         </div>
                         <div className={styles.statCard}>
                             <p className={styles.statLabel}>Tasks Completed</p>
-                            <p className={styles.statNum}>{doneTasks}</p>
-                            <p className={styles.statSub}>of {totalTasks} total</p>
+                            <p className={styles.statNum}>NULL</p>
+                            <p className={styles.statSub}>of NULL total</p>
                         </div>
                         <div className={styles.statCard}>
                             <p className={styles.statLabel}>Completion Rate</p>
-                            <p className={styles.statNum}>{Math.round((doneTasks / totalTasks) * 100)}%</p>
+                            <p className={styles.statNum}>NULL</p>
                             <p className={styles.statSub}>across all projects</p>
                         </div>
-                        <div className={`${styles.statCard} ${blockedTasks > 0 ? styles.statCardWarning : ""}`}>
+                        <div className={`${styles.statCard} NULL > 0 ? styles.statCardWarning : ""}`}>
                             <p className={styles.statLabel}>Blocked Tasks</p>
-                            <p className={styles.statNum}>{blockedTasks}</p>
-                            <p className={styles.statSub}>{blockedTasks > 0 ? "needs attention" : "all clear"}</p>
+                            <p className={styles.statNum}>NULL</p>
+                            <p className={styles.statSub}>{0 > 0 ? "needs attention" : "all clear"}</p>
                         </div>
                     </div>
 
@@ -203,40 +196,29 @@ export default function DashboardPage() {
                                     ))}
                                 </div>
                             </div>
-
-                            <div className={styles.projectsList}>
-                                {filtered.map(p => (
-                                    <Link href={`/dashboard/projects/${p.id}`} key={p.id} className={styles.projectCard}>
+                            {loadingProject && <span>Loading your projects...</span>}
+                            {!loadingProject && (<div className={styles.projectsList}>
+                                {filtered?.map(p => (
+                                    // Change p.id to p.ID (if that's what your Go struct uses)
+                                    <Link href={`/dashboard/projects/${p.ID}`} key={p.ID} className={styles.projectCard}>
                                         <div className={styles.projectCardTop}>
                                             <div>
+                                                {/* Change p.name to p.Name */}
                                                 <h3 className={styles.projectName}>{p.name}</h3>
                                                 <div className={styles.projectMeta}>
-                                                    <span className={styles.sdlcTag}>{p.sdlc}</span>
-                                                    <PhaseStatusBadge phase={p.currentPhase} status={p.status} />
+                                                    <span className={styles.sdlcTag}>{p.sdlc.name}</span>
+                                                    <PhaseStatusBadge phase={p.current_phase_id.toString()} status={p.status} />
                                                 </div>
                                             </div>
                                             <span className={styles.projectArrow}>→</span>
                                         </div>
 
-                                        <ProgressBar value={p.progress} />
+                                        {/* <ProgressBar value={p.progress} /> */}
 
-                                        <div className={styles.projectCardBottom}>
-                                            <div className={styles.taskPills}>
-                                                <span className={styles.taskPillDone}>✓ {p.taskSummary.done}</span>
-                                                {p.taskSummary.inProgress > 0 && (
-                                                    <span className={styles.taskPillProgress}>● {p.taskSummary.inProgress}</span>
-                                                )}
-                                                {p.taskSummary.blocked > 0 && (
-                                                    <span className={styles.taskPillBlocked}>! {p.taskSummary.blocked}</span>
-                                                )}
-                                                <span className={styles.taskPillTodo}>○ {p.taskSummary.todo}</span>
-                                            </div>
-                                            <span className={styles.projectUpdated}>{p.updatedAt}</span>
-                                        </div>
                                     </Link>
                                 ))}
 
-                                {filtered.length === 0 && (
+                                {filtered?.length === 0 && (
                                     <div className={styles.emptyState}>
                                         <p className={styles.emptyStateText}>No {filter} projects found.</p>
                                         <Link href="/dashboard/projects/new" className={styles.emptyStateLink}>
@@ -245,6 +227,7 @@ export default function DashboardPage() {
                                     </div>
                                 )}
                             </div>
+                            )}
                         </div>
 
                         {/* activity */}
@@ -268,7 +251,6 @@ export default function DashboardPage() {
                                 ))}
                             </div>
                         </div>
-
                     </div>
                 </div>
             </main>
