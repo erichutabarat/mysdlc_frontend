@@ -2,12 +2,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import styles from '../auth.module.css';
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
     const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+
+    const router = useRouter();
 
     const passwordStrength = (p: string) => {
         if (!p) return 0;
@@ -47,16 +51,20 @@ export default function RegisterPage() {
         setLoading(true);
         setError("");
         try {
-            // TODO: replace with real API call
-            // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
-            //   method: "POST",
-            //   headers: { "Content-Type": "application/json" },
-            //   body: JSON.stringify({ name: form.name, email: form.email, password: form.password }),
-            //   credentials: "include",
-            // });
-            // if (!res.ok) throw new Error("Registration failed");
-            // router.push("/dashboard");
-            await new Promise(r => setTimeout(r, 1000));
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: form.name, email: form.email, password: form.password }),
+            });
+
+            if (!res.ok) throw new Error("Registration failed");
+
+            // Handle Success
+            setSuccess(true);
+            setTimeout(() => {
+                router.push('/login');
+            }, 2000);
+
         } catch (err) {
             setError("Registration failed. This email may already be in use.");
         } finally {
@@ -86,9 +94,16 @@ export default function RegisterPage() {
                     </div>
 
                     {error && (
-                        <div className={styles.errorBanner}>
+                        <div className={styles.errorBanner} style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>
                             <span className={styles.errorIcon}>⚠</span>
                             {error}
+                        </div>
+                    )}
+
+                    {success && (
+                        <div className={styles.successBanner} style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                            <span className={styles.successIcon}>✓</span>
+                            Account created successfully! Redirecting to login...
                         </div>
                     )}
 
