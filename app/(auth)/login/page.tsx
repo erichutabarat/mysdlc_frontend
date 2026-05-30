@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import styles from '../auth.module.css';
+import { setAuthCookie } from "@/app/actions/auth";
 
 export default function LoginPage() {
     const [form, setForm] = useState({ email: "", password: "" });
@@ -18,18 +19,23 @@ export default function LoginPage() {
         e.preventDefault();
         setLoading(true);
         setError("");
+
         try {
-            // TODO: replace with real API call
-            // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-            //   method: "POST",
-            //   headers: { "Content-Type": "application/json" },
-            //   body: JSON.stringify(form),
-            //   credentials: "include",
-            // });
-            // if (!res.ok) throw new Error("Invalid credentials");
-            // const data = await res.json();
-            // router.push("/dashboard");
-            await new Promise(r => setTimeout(r, 1000)); // simulate
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(form),
+            });
+
+            if (!res.ok) throw new Error("Invalid credentials");
+
+            const data = await res.json();
+            // Assuming data.token is your JWT
+            await setAuthCookie(data.data.token);
+
+            // Redirect the user to dashboard after success
+            window.location.href = '/dashboard';
+
         } catch (err) {
             setError("Invalid email or password. Please try again.");
         } finally {
