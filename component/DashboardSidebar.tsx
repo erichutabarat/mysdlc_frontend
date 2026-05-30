@@ -3,11 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import styles from "../app/(dashboard)/dashboard.module.css";
+import { usePathname } from "next/navigation";
 
 const mockUser = { name: "Eric Daniel", email: "eric@example.com", role: "user" };
 
 export default function DashboardSidebar() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const pathname = usePathname();
+
+    // Helper to check if the link is active
+    const isActive = (path: string) => pathname === path;
 
     return (
         <>
@@ -21,13 +26,20 @@ export default function DashboardSidebar() {
 
                 <nav className={styles.sidebarNav}>
                     <p className={styles.sidebarSection}>Main</p>
-                    <Link href="/dashboard" className={`${styles.sidebarLink} ${styles.sidebarLinkActive}`}>
+                    <Link
+                        href="/dashboard"
+                        className={`${styles.sidebarLink} ${isActive("/dashboard") ? styles.sidebarLinkActive : ""}`}
+                    >
                         <span className={styles.sidebarIcon}>⬡</span> Dashboard
                     </Link>
-                    <Link href="/dashboard/projects" className={styles.sidebarLink}>
+
+                    <Link
+                        href="/dashboard/projects"
+                        className={`${styles.sidebarLink} ${isActive("/dashboard/projects") ? styles.sidebarLinkActive : ""}`}
+                    >
                         <span className={styles.sidebarIcon}>◈</span> Projects
                     </Link>
-                    <Link href="/dashboard/tasks" className={styles.sidebarLink}>
+                    <Link href="/dashboard/tasks" className={`${styles.sidebarLink} ${isActive("/dashboard/tasks") ? styles.sidebarLinkActive : ""}`}>
                         <span className={styles.sidebarIcon}>◉</span> My Tasks
                     </Link>
 
