@@ -45,7 +45,7 @@ function ActivityIcon({ type }: { type: string }) {
 }
 
 export default function DashboardPage() {
-    const [projects, setProjects] = useState<Project[]>([]);
+    const [projects, setProjects] = useState<ProjectListItem[]>([]);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loadingProject, setLoadingProject] = useState(true);
     const [error, setError] = useState("");
@@ -151,14 +151,14 @@ export default function DashboardPage() {
                         {!loadingProject && (<div className={styles.projectsList}>
                             {filtered?.map(p => (
                                 // Change p.id to p.ID (if that's what your Go struct uses)
-                                <Link href={`/dashboard/projects/${p.ID}`} key={p.ID} className={styles.projectCard}>
+                                <Link href={`/dashboard/projects/${p.id}`} key={p.id} className={styles.projectCard}>
                                     <div className={styles.projectCardTop}>
                                         <div>
                                             {/* Change p.name to p.Name */}
                                             <h3 className={styles.projectName}>{p.name}</h3>
                                             <div className={styles.projectMeta}>
-                                                <span className={styles.sdlcTag}>{p.sdlc.name}</span>
-                                                <PhaseStatusBadge phase={p.current_phase_id.toString()} status={p.status} />
+                                                <span className={styles.sdlcTag}>{p.sdlc_name}</span>
+                                                <PhaseStatusBadge phase={p.status} status={p.status} />
                                             </div>
                                         </div>
                                         <span className={styles.projectArrow}>→</span>

@@ -20,6 +20,15 @@ interface SDLC {
     created_by: User;
 }
 
+interface ProjectListItem {
+    id: number;
+    name: string;
+    email: string;
+    status: string;
+    sdlc_name: string;
+    current_phase: string;
+}
+
 interface Project {
     ID: number;
     CreatedAt: string;
@@ -33,6 +42,4 @@ interface Project {
     sdlc_id: number;
     sdlc: SDLC;
     current_phase_id: number;
-    // Note: If you don't have taskSummary in the API yet, 
-    // I have omitted it here based on your provided JSON.
 }
