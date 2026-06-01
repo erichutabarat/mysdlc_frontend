@@ -16,6 +16,11 @@ export default function ProjectDetailPage() {
     const [data, setData] = useState<ProjectDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [email, setEmail] = useState("");
+    const [showModalMessage, setShowModalMessage] = useState(false);
+    const [message, setMessage] = useState("");
 
     useEffect(() => {
         const fetchProject = async () => {
@@ -38,6 +43,47 @@ export default function ProjectDetailPage() {
 
         if (id) fetchProject();
     }, [id]);
+
+    const handleDeleteProject = async () => {
+        try {
+            const res = await apiFetch(`projects/${id}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to delete project");
+            }
+            const json = await res.json();
+            console.log("Project deleted:", json);
+            setShowModalMessage(true);
+            setMessage("Project deleted successfully.");
+        }
+        catch (err) {
+            console.error(err);
+            setError("Could not delete project. Please try again.");
+        }
+    };
+
+    const handleInviteMember = async () => {
+        try {
+            // const res = await apiFetch(`projects/${id}/invite`, {
+            //     method: "POST",
+            //     body: JSON.stringify({ email }),
+            // });
+
+            // if (!res.ok) {
+            //     throw new Error("Failed to send invite");
+            // }
+            // alert(`Invite sent to ${email}`);
+            // setEmail("");
+            // setShowInviteModal(false);
+            alert("invite");
+        }
+        catch (err) {
+            console.error(err);
+            setError("Could not send invite. Please try again.");
+        }
+    };
 
     // ── Loading ──
     if (loading) {
@@ -265,9 +311,104 @@ export default function ProjectDetailPage() {
                             </div>
                         </div>
                     </div>
+                    {/* Setting */}
+                    <div className={styles.infoCard}>
+                        <h3 className={styles.infoCardTitle}>Project Settings</h3>
+                        <div className="flex flex-col gap-3 mt-4">
+                            <button
+                                onClick={() => setShowInviteModal(true)}
+                                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                            >
+                                Invite Members
+                            </button>
 
+                            <button
+                                onClick={() => setShowDeleteModal(true)}
+                                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+                            >
+                                Delete Project
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
+            {showDeleteModal && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+                    {/* Dark Modal Container */}
+                    <div className="bg-gray-900 border border-gray-700 text-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+                        <h2 className="text-xl font-semibold">Delete Project</h2>
+                        <p className="mt-2 text-gray-400">
+                            This action cannot be undone. Are you sure you want to delete this
+                            project?
+                        </p>
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteProject}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                            >
+                                Delete Project
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showInviteModal && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-gray-900 border border-gray-700 text-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+                        <h2 className="text-xl font-semibold">Invite Member</h2>
+
+                        <input
+                            type="email"
+                            placeholder="member@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full mt-4 border rounded-lg px-3 py-2"
+                        />
+
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button
+                                onClick={() => setShowInviteModal(false)}
+                                className="px-4 py-2 border rounded-lg"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={handleInviteMember}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            >
+                                Send Invite
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showModalMessage && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-gray-900 border border-gray-700 text-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+                        <p className="text-center">{message}</p>
+                        <div className="flex justify-center mt-6">
+                            <button
+                                onClick={() => {
+                                    setShowModalMessage(false);
+                                    if (message.includes("deleted")) {
+                                        router.push("/dashboard");
+                                    }
+                                }}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
