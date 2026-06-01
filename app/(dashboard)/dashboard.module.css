@@ -757,3 +757,15 @@
         transform: rotate(360deg);
     }
 }
+
+.statusAccepted {
+    color: #22c55e;
+    /* green */
+    font-weight: 500;
+}
+
+.statusPending {
+    color: #9ca3af;
+    /* gray */
+    font-weight: 500;
+}

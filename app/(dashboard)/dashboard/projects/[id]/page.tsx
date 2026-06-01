@@ -7,6 +7,7 @@ import { apiFetch } from "@/utils/api";
 import { phaseProgress } from "@/helpers/phase_helper";
 
 import { StatusBadge } from "@/helpers/status_helper";
+import { getStatusStyle } from "@/helpers/member_helper";
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 export default function ProjectDetailPage() {
@@ -14,7 +15,9 @@ export default function ProjectDetailPage() {
     const router = useRouter();
 
     const [data, setData] = useState<ProjectDetail | null>(null);
+    const [dataMembers, setDataMembers] = useState<ProjectMembers[] | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loadingMembers, setLoadingMembers] = useState(true);
     const [error, setError] = useState("");
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showInviteModal, setShowInviteModal] = useState(false);
@@ -42,7 +45,28 @@ export default function ProjectDetailPage() {
             }
         };
 
-        if (id) fetchProject();
+        const fetchProjectMembers = async () => {
+            try {
+                const res = await apiFetch(`projects/${id}/members`);
+
+                if (!res.ok) {
+                    throw new Error("Failed to fetch project members");
+                }
+                const json = await res.json();
+                setDataMembers(json.data);
+            } catch (err) {
+                console.error(err);
+                setError("Could not load project members. Please try again.");
+            }
+            finally {
+                setLoadingMembers(false);
+            }
+        }
+
+        if (id) {
+            fetchProject();
+            fetchProjectMembers();
+        }
     }, [id]);
 
     const handleDeleteProject = async () => {
@@ -85,6 +109,10 @@ export default function ProjectDetailPage() {
             setError("Could not send invite. Please try again.");
         }
     };
+
+    const filteredMembers = dataMembers?.filter(
+        (m) => m.status === "accepted" || m.status === "pending"
+    );
 
     // ── Loading ──
     if (loading) {
@@ -312,6 +340,45 @@ export default function ProjectDetailPage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Members */}
+                    {/* Members */}
+                    <div className={styles.infoCard}>
+                        <h3 className={styles.infoCardTitle}>Project Members</h3>
+
+                        {loadingMembers ? (
+                            <p>Loading members...</p>
+                        ) : (
+                            <>
+                                {filteredMembers && filteredMembers.length > 0 ? (
+                                    filteredMembers.map((member) => (
+                                        <div
+                                            key={`${member.project_id}-${member.user_id}`}
+                                            className={styles.ownerRow}
+                                        >
+                                            <div className={styles.ownerAvatar}>
+                                                {member.email?.[0]?.toUpperCase() ?? "?"}
+                                            </div>
+
+                                            <div>
+                                                <p className={styles.ownerName}>{member.email}</p>
+
+                                                <p className={styles.ownerEmail}>
+                                                    {member.role} •{" "}
+                                                    <span className={getStatusStyle(member.status)}>
+                                                        {member.status}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p>No members found</p>
+                                )}
+                            </>
+                        )}
+                    </div>
+
                     {/* Setting */}
                     <div className={styles.infoCard}>
                         <h3 className={styles.infoCardTitle}>Project Settings</h3>

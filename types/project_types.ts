@@ -42,3 +42,11 @@ interface ProjectDetail {
     project: Project;
     phases: Phase[];
 }
+
+interface ProjectMembers {
+    user_id: number;
+    project_id: number;
+    role: string;
+    status: "accepted" | "pending" | "rejected";
+    email: string;
+}
