@@ -32,6 +32,7 @@ export default function ProjectDetailPage() {
                 }
 
                 const json = await res.json();
+                console.log(json.data);
                 setData(json.data);
             } catch (err) {
                 console.error(err);
@@ -135,7 +136,7 @@ export default function ProjectDetailPage() {
                         <div className={styles.projectHeaderTop}>
                             <div>
                                 <p className={styles.sdlcLabel}>{project.sdlc?.name ?? "—"}</p>
-                                <h1 className={styles.projectTitle}>{project.name}</h1>
+                                <h1 className={styles.projectTitle}>{project.name.toUpperCase()}</h1>
                                 {project.description && (
                                     <p className={styles.projectDesc}>{project.description}</p>
                                 )}
@@ -290,7 +291,7 @@ export default function ProjectDetailPage() {
                             {phases.map(p => (
                                 <div
                                     key={p.ID}
-                                    title={p.name}
+                                    title={p.name.toUpperCase()}
                                     className={`${styles.miniPhase}
                     ${p.status === "complete" ? styles.miniPhaseDone : ""}
                     ${p.status === "active" ? styles.miniPhaseActive : ""}

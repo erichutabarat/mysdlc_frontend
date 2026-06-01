@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from '../dashboard.module.css';
 import { getProjects } from "@/app/actions/projects";
+import { PhaseStatusBadge } from "@/helpers/phase_helper";
 
 const mockActivity = [
     { id: 1, project: "Final Year Thesis", action: "Phase advanced to Design", time: "2h ago", type: "phase" },
@@ -11,20 +12,6 @@ const mockActivity = [
     { id: 4, project: "Final Year Thesis", action: "Task 'Wireframes' moved to In Progress", time: "1d ago", type: "task" },
     { id: 5, project: "E-Commerce API", action: "John Smith added as Contributor", time: "2d ago", type: "member" },
 ];
-// ────────────────────────────────────────────────────────────────────────────
-
-function PhaseStatusBadge({ phase, status }: { phase: string; status: string }) {
-    return (
-        <div className="flex flex-row p-3 text-lg">
-            <span className={`${styles.phaseBadge} ${status === "archived" ? styles.phaseBadgeArchived : ""}`}>
-                {status}
-            </span>
-            <span className={`${styles.phaseBadge} ${status === "archived" ? styles.phaseBadgeArchived : ""}`}>
-                Phase {phase}
-            </span>
-        </div>
-    );
-}
 
 function ProgressBar({ value }: { value: number }) {
     return (
@@ -159,7 +146,7 @@ export default function DashboardPage() {
                                             <h3 className={styles.projectName}>{p.name}</h3>
                                             <div className={styles.projectMeta}>
                                                 <span className={styles.sdlcTag}>{p.sdlc_name}</span>
-                                                <PhaseStatusBadge phase={p.status} status={p.status} />
+                                                <PhaseStatusBadge phase={p.current_phase} status={p.status} />
                                             </div>
                                         </div>
                                         <span className={styles.projectArrow}>→</span>
