@@ -132,8 +132,7 @@
 
 /* ── LAYOUT ── */
 .layout {
-  max-width: 1200px;
-  margin: 0 auto;
+  /* margin: 0 auto; */
   padding: 32px;
   display: grid;
   grid-template-columns: 1fr 300px;

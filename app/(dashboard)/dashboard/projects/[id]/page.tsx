@@ -4,27 +4,9 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./project.module.css";
 import { apiFetch } from "@/utils/api";
+import { phaseProgress } from "@/helpers/phase_helper";
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-function phaseProgress(phases?: Phase[]) {
-    if (!phases || phases.length === 0) return 0;
-
-    const total = phases.length;
-    const done = phases.filter(p => p.status === "complete").length;
-
-    return Math.round((done / total) * 100);
-}
-
-function StatusBadge({ status }: { status: string }) {
-    const map: Record<string, { label: string; cls: string }> = {
-        active: { label: "Active", cls: styles.badgeActive },
-        locked: { label: "Locked", cls: styles.badgeLocked },
-        complete: { label: "Complete", cls: styles.badgeComplete },
-        archived: { label: "Archived", cls: styles.badgeArchived },
-    };
-    const s = map[status] ?? { label: status, cls: styles.badgeLocked };
-    return <span className={`${styles.badge} ${s.cls}`}>{s.label}</span>;
-}
+import { StatusBadge } from "@/helpers/status_helper";
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 export default function ProjectDetailPage() {
