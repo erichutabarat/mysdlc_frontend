@@ -12,7 +12,11 @@ export default function DashboardSidebar() {
     const pathname = usePathname();
 
     // Helper to check if the link is active
-    const isActive = (path: string) => pathname.includes(path);
+    const isActive = (path: string) => {
+        if (path === '/dashboard') return pathname === '/dashboard';
+
+        return pathname.startsWith(path);
+    };
 
     return (
         <>
