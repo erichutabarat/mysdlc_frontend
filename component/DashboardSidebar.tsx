@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import styles from "../app/(dashboard)/dashboard.module.css";
 import { usePathname } from "next/navigation";
+import { logout } from "@/app/actions/auth";
 
 const mockUser = { name: "Eric Daniel", email: "eric@example.com", role: "user" };
 
@@ -59,7 +60,13 @@ export default function DashboardSidebar() {
                         <p className={styles.userName}>{mockUser.name}</p>
                         <p className={styles.userEmail}>{mockUser.email}</p>
                     </div>
-                    <button className={styles.logoutBtn} title="Log out">⏻</button>
+                    <button
+                        className={styles.logoutBtn}
+                        title="Log out"
+                        onClick={async () => await logout()}
+                    >
+                        ⏻ Log Out
+                    </button>
                 </div>
             </aside>
 
