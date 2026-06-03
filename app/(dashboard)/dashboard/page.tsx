@@ -43,7 +43,6 @@ export default function DashboardPage() {
             try {
                 const data = await getProjects();
                 setProjects(data);
-                console.log("Loaded projects:", data);
             } catch (err) {
                 setError("Could not load projects.");
             } finally {
@@ -53,13 +52,18 @@ export default function DashboardPage() {
         loadData();
     }, []);
 
-    const filtered = projects.filter(p => filter === "all" ? true : p.status === filter);
-    const totalProjects = projects.length;
-    const activeProjects = projects.filter(p => p.status === "active").length;
+    const filtered = (projects ?? []).filter(p => filter === "all" ? true : p.status === filter);
+    const totalProjects = (projects ?? []).length;
+    const activeProjects = (projects ?? []).filter(p => p.status === "active").length;
+
+    // Placeholder values — replace with real data from your API when available
+    const tasksCompleted = 0;
+    const tasksTotal = 0;
+    const completionRate = 0;
+    const blockedTasks = 0;
 
     return (
         <>
-
             {/* topbar */}
             <div className={styles.topbar}>
                 <button
@@ -101,18 +105,18 @@ export default function DashboardPage() {
                     </div>
                     <div className={styles.statCard}>
                         <p className={styles.statLabel}>Tasks Completed</p>
-                        <p className={styles.statNum}>NULL</p>
-                        <p className={styles.statSub}>of NULL total</p>
+                        <p className={styles.statNum}>{tasksCompleted}</p>
+                        <p className={styles.statSub}>of {tasksTotal} total</p>
                     </div>
                     <div className={styles.statCard}>
                         <p className={styles.statLabel}>Completion Rate</p>
-                        <p className={styles.statNum}>NULL</p>
+                        <p className={styles.statNum}>{completionRate}%</p>
                         <p className={styles.statSub}>across all projects</p>
                     </div>
-                    <div className={`${styles.statCard} NULL > 0 ? styles.statCardWarning : ""}`}>
+                    <div className={`${styles.statCard} ${blockedTasks > 0 ? styles.statCardWarning : ""}`}>
                         <p className={styles.statLabel}>Blocked Tasks</p>
-                        <p className={styles.statNum}>NULL</p>
-                        <p className={styles.statSub}>{0 > 0 ? "needs attention" : "all clear"}</p>
+                        <p className={styles.statNum}>{blockedTasks}</p>
+                        <p className={styles.statSub}>{blockedTasks > 0 ? "needs attention" : "all clear"}</p>
                     </div>
                 </div>
 
@@ -135,14 +139,14 @@ export default function DashboardPage() {
                                 ))}
                             </div>
                         </div>
+
                         {loadingProject && <span>Loading your projects...</span>}
-                        {!loadingProject && (<div className={styles.projectsList}>
-                            {filtered?.map(p => (
-                                // Change p.id to p.ID (if that's what your Go struct uses)
+
+                        <div className={styles.projectsList}>
+                            {!loadingProject && filtered.map(p => (
                                 <Link href={`/dashboard/projects/${p.id}`} key={p.id} className={styles.projectCard}>
                                     <div className={styles.projectCardTop}>
                                         <div>
-                                            {/* Change p.name to p.Name */}
                                             <h3 className={styles.projectName}>{p.name}</h3>
                                             <div className={styles.projectMeta}>
                                                 <span className={styles.sdlcTag}>{p.sdlc_name}</span>
@@ -151,22 +155,26 @@ export default function DashboardPage() {
                                         </div>
                                         <span className={styles.projectArrow}>→</span>
                                     </div>
-
-                                    {/* <ProgressBar value={p.progress} /> */}
-
                                 </Link>
                             ))}
 
-                            {filtered?.length === 0 && (
+                            {!loadingProject && filtered.length === 0 && (
                                 <div className={styles.emptyState}>
-                                    <p className={styles.emptyStateText}>No {filter} projects found.</p>
+                                    <p className={styles.emptyStateText}>
+                                        {filter === "all"
+                                            ? "You don't have any projects yet."
+                                            : `No ${filter} projects found.`}
+                                    </p>
                                     <Link href="/dashboard/projects/new" className={styles.emptyStateLink}>
                                         Create your first project →
                                     </Link>
                                 </div>
                             )}
+
+                            {!loadingProject && error && (
+                                <p className={styles.emptyStateText}>{error}</p>
+                            )}
                         </div>
-                        )}
                     </div>
 
                     {/* activity */}
