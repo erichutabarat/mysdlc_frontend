@@ -1,17 +1,22 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from '../auth.module.css';
 import { useRouter } from "next/navigation";
+import { Turnstile } from "@marsidev/react-turnstile";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function RegisterPage() {
     const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+    const [token, setToken] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
     const router = useRouter();
+
+    const mounted = useMounted();
 
     const passwordStrength = (p: string) => {
         if (!p) return 0;
@@ -40,6 +45,7 @@ export default function RegisterPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         if (form.password !== form.confirm) {
             setError("Passwords do not match.");
             return;
@@ -51,9 +57,13 @@ export default function RegisterPage() {
         setLoading(true);
         setError("");
         try {
+            if (!token) {
+                setError('Please complete the captcha');
+                return;
+            }
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/register`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Turnstile-Token": token },
                 body: JSON.stringify({ name: form.name, email: form.email, password: form.password }),
             });
 
@@ -200,11 +210,15 @@ export default function RegisterPage() {
                             and{" "}
                             <Link href="/privacy" className={styles.cardLink}>Privacy Policy</Link>.
                         </p>
-
+                        <Turnstile
+                            siteKey={process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY!}
+                            onSuccess={(token) => setToken(token)}
+                        />
                         <button
                             type="submit"
+                            suppressHydrationWarning
                             className={`${styles.submitBtn} ${loading ? styles.submitBtnLoading : ""}`}
-                            disabled={loading || !form.name || !form.email || !form.password || !form.confirm}
+                            disabled={!mounted || loading || !form.name || !form.email || !form.password || !form.confirm || !token}
                         >
                             {loading ? <span className={styles.spinner} /> : "Create Account"}
                         </button>

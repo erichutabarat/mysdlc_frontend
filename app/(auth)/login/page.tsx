@@ -1,14 +1,19 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from '../auth.module.css';
 import { setAuthCookie } from "@/app/actions/auth";
+import { Turnstile } from "@marsidev/react-turnstile";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function LoginPage() {
     const [form, setForm] = useState({ email: "", password: "" });
+    const [token, setToken] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+
+    const mounted = useMounted();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -21,9 +26,13 @@ export default function LoginPage() {
         setError("");
 
         try {
+            if (!token) return alert('Please complete the captcha');
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/login`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Turnstile-Token": token,
+                },
                 body: JSON.stringify(form),
             });
 
@@ -119,11 +128,15 @@ export default function LoginPage() {
                                 </button>
                             </div>
                         </div>
-
+                        <Turnstile
+                            siteKey={process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY!}
+                            onSuccess={(token) => setToken(token)}
+                        />
                         <button
                             type="submit"
+                            suppressHydrationWarning
                             className={`${styles.submitBtn} ${loading ? styles.submitBtnLoading : ""}`}
-                            disabled={loading || !form.email || !form.password}
+                            disabled={!mounted || loading || !form.email || !form.password || !token}
                         >
                             {loading ? <span className={styles.spinner} /> : "Log In"}
                         </button>
