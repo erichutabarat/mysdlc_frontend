@@ -1,17 +1,21 @@
-FROM node:22-alpine
+FROM node:22-alpine AS deps
 WORKDIR /app
-
-# Copy dependency files
 COPY package*.json ./
-RUN npm install
+# Use ci for reproducible installs (faster than npm install)
+RUN npm ci
 
-# Copy source code
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Build the project
 RUN npm run build
 
-# Expose the default Next.js port
+# Standalone output mode — only ships what Next.js actually needs
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 EXPOSE 3000
-
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
