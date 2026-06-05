@@ -27,7 +27,7 @@ export default function LoginPage() {
 
         try {
             if (!token) return alert('Please complete the captcha');
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/login`, {
+            const res = await fetch(`/api/v1/users/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

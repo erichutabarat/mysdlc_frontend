@@ -1,7 +1,7 @@
 'use server'
 
 export async function getSDLCS() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/sdlc`, {
+    const res = await fetch(`/api/v1/sdlc`, {
         headers: {
             'Content-Type': 'application/json'
         }

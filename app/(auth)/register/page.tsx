@@ -61,7 +61,7 @@ export default function RegisterPage() {
                 setError('Please complete the captcha');
                 return;
             }
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/register`, {
+            const res = await fetch(`/api/v1/users/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "X-Turnstile-Token": token },
                 body: JSON.stringify({ name: form.name, email: form.email, password: form.password }),

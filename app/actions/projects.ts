@@ -5,7 +5,7 @@ export async function getProjects() {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects`, {
+    const res = await fetch(`/api/v1/projects`, {
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -23,7 +23,7 @@ export async function createProjects(form: any) {
     const token = cookieStore.get("token")?.value;
 
     const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects`,
+        `/api/v1/projects`,
         {
             method: "POST",
             headers: {
