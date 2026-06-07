@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from './new-project.module.css';
-import { getSDLCS } from "@/app/actions/sdlcs";
 import { createProjects } from "@/app/actions/projects";
 import { useRouter } from "next/navigation";
 
@@ -23,10 +22,25 @@ export default function NewProjectPage() {
     useEffect(() => {
         setMounted(true);
         const loadSDLCS = async () => {
-            const data = await getSDLCS();
-            setSDLCS(data || []);
-            setLoading(false);
+            try {
+                // Now fetching from the client browser
+                const res = await fetch(`/api/v1/sdlc/`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch");
+
+                const result = await res.json();
+                setSDLCS(result.data || []);
+            } catch (err) {
+                console.error("Fetch error:", err);
+            } finally {
+                setLoading(false);
+            }
         };
+
         loadSDLCS();
     }, []);
 

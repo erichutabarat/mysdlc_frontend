@@ -1,11 +1,12 @@
 'use server'
+import { backendUrl } from '@/lib/api';
 import { cookies } from 'next/headers';
 
 export async function getProjects() {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
-    const res = await fetch(`/api/v1/projects`, {
+    const res = await fetch(`${backendUrl}/api/v1/projects`, {  // ← full URL
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -14,7 +15,6 @@ export async function getProjects() {
 
     if (!res.ok) throw new Error("Failed to fetch");
     const result = await res.json();
-
     return result.data;
 }
 
@@ -23,7 +23,7 @@ export async function createProjects(form: any) {
     const token = cookieStore.get("token")?.value;
 
     const res = await fetch(
-        `/api/v1/projects`,
+        `${backendUrl}/api/v1/projects`,
         {
             method: "POST",
             headers: {
