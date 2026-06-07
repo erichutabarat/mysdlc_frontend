@@ -1,14 +1,15 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NODE_ENV === 'development'
+    ? 'http://127.0.0.1:8080'
+    : 'http://backend:8080';
 
 async function handler(
     req: NextRequest,
     { params }: { params: Promise<{ path: string[] }> }
 ) {
-    const { path } = await params; // ✅ IMPORTANT FIX
-
+    const { path } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
@@ -18,7 +19,6 @@ async function handler(
 
     const fullPath = path.join("/");
     const search = req.nextUrl.search;
-
     const isFormData = req.headers
         .get("content-type")
         ?.includes("multipart/form-data");
@@ -40,11 +40,8 @@ async function handler(
         } as RequestInit
     );
 
-    const data = await res.text(); // safer than res.json()
-
-    return new NextResponse(data, {
-        status: res.status,
-    });
+    const data = await res.text();
+    return new NextResponse(data, { status: res.status });
 }
 
 export const GET = handler;
