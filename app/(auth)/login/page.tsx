@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import styles from '../auth.module.css';
 import { setAuthCookie } from "@/app/actions/auth";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { useMounted } from "@/hooks/useMounted";
 
 export default function LoginPage() {
@@ -12,6 +12,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const turnstileRef = useRef<TurnstileInstance>(null);
 
     const mounted = useMounted();
 
@@ -47,6 +48,8 @@ export default function LoginPage() {
 
         } catch (err) {
             setError("Invalid email or password. Please try again.");
+            setToken("");
+            turnstileRef.current?.reset();
         } finally {
             setLoading(false);
         }
@@ -129,8 +132,12 @@ export default function LoginPage() {
                             </div>
                         </div>
                         <Turnstile
+                            ref={turnstileRef}
                             siteKey={process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY!}
                             onSuccess={(token) => setToken(token)}
+                            options={{
+                                theme: 'dark',
+                            }}
                         />
                         <button
                             type="submit"
