@@ -74,10 +74,17 @@ export default function PhaseTasksPage() {
         setTasks((prev) =>
             prev.map((t) => (t.ID === taskId ? { ...t, status: newStatus } : t))
         );
+
         try {
-            await apiFetch(`tasks/${taskId}`, {
+            await apiFetch(`projects/${id}/phases/${phaseId}/tasks`, {
                 method: "PATCH",
-                body: JSON.stringify({ status: newStatus }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    task_id: taskId,
+                    status: newStatus
+                }),
             });
         } catch (err) {
             console.error("Failed to update task status", err);
@@ -111,9 +118,16 @@ export default function PhaseTasksPage() {
     const handleDeleteTask = async (taskId: number) => {
         setDeletingTaskId(taskId);
         try {
-            const res = await apiFetch(`tasks/${taskId}`, {
+            const res = await apiFetch(`projects/${id}/phases/${phaseId}/tasks`, {
                 method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    task_id: taskId,
+                }),
             });
+
             if (!res.ok) throw new Error("Failed to delete task");
 
             setTasks((prev) => prev.filter((t) => t.ID !== taskId));
