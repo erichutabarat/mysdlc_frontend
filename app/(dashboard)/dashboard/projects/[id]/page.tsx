@@ -265,7 +265,9 @@ export default function ProjectDetailPage() {
                                             {isActive && (
                                                 <div className={styles.phaseActions}>
                                                     <button className={styles.phaseActionBtn}>
-                                                        View Tasks
+                                                        <Link href={`/dashboard/projects/${id}/phase/${phase.ID}/tasks`}>
+                                                            View Tasks
+                                                        </Link>
                                                     </button>
                                                     <button className={styles.phaseActionBtnOutline}>
                                                         Upload Document
