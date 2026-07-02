@@ -101,11 +101,24 @@ export default function PhaseTasksPage() {
                     title: newTask.title,
                     description: newTask.description,
                     priority: newTask.priority,
-                    due_date: newTask.due_date || null,
+                    due_date: newTask.due_date ? `${newTask.due_date}T00:00:00Z` : null,
                 }),
             });
             const json = await res.json();
-            setTasks((prev) => [...prev, json.data]);
+
+            // debug: see what the API actually returns
+            console.log("create task response:", json);
+
+            // guard: only push if data exists and has required fields
+            if (json.data && json.data.ID && json.data.status) {
+                setTasks((prev) => [...prev, json.data]);
+            } else {
+                // fallback: refetch all tasks to sync state
+                const tasksRes = await apiFetch(`projects/${id}/phases/${phaseId}/tasks`);
+                const tasksJson = await tasksRes.json();
+                setTasks(tasksJson.data ?? []);
+            }
+
             setShowCreateModal(false);
             setNewTask({ title: "", description: "", priority: "medium", due_date: "" });
         } catch (err) {
@@ -171,9 +184,9 @@ export default function PhaseTasksPage() {
             .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
 
     const totalTasks = tasks.length;
-    const doneTasks = tasks.filter((t) => t.status === "done").length;
-    const blockedTasks = tasks.filter((t) => t.status === "blocked").length;
-    const overdueTasks = tasks.filter((t) => isOverdue(t.due_date, t.status)).length;
+    const doneTasks = tasks.filter((t) => t?.status === "done").length;
+    const blockedTasks = tasks.filter((t) => t?.status === "blocked").length;
+    const overdueTasks = tasks.filter((t) => isOverdue(t?.due_date, t?.status)).length;
     const isPhaseLocked = currentPhase.status === "locked";
 
     return (
